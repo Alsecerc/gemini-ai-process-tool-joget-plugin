@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1753621603276
+Build-Jdk-Spec: 17
+Bundle-Activator: com.mycompany.plugin.Activator
+Bundle-ClassPath: .,json-20230227.jar
+Bundle-Description: Process tool to integrate Google Gemini AI
+Bundle-ManifestVersion: 2
+Bundle-Name: Gemini AI Process Tool Plugin
+Bundle-SymbolicName: gemini-ai-process-tool
+Bundle-Version: 1.0.0
+Created-By: Apache Maven Bundle Plugin 5.1.8
+Embed-Dependency: json
+Embed-Transitive: false
+Embedded-Artifacts: json-20230227.jar;g="org.json";a="json";v="20230227"
+Export-Package: com.mycompany.plugin;uses:="org.joget.plugin.base,org.os
+ gi.framework";version="1.0.0"
+Import-Package: org.osgi.framework;version="[1.8,2)",org.joget.plugin.ba
+ se,org.joget.workflow.model,org.joget.apps.app.service,org.joget.common
+ s.util;resolution:=optional,org.joget.workflow.util
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Tool: Bnd-6.3.1.202206071316

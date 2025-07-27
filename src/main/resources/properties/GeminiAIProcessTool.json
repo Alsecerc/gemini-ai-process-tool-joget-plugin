@@ -1,0 +1,65 @@
+[
+  {
+    "title": "Input Configuration",
+    "properties": [
+      {
+        "name": "userPromptVariable",
+        "label": "User Prompt Variable",
+        "type": "textfield",
+        "value": "userprompt",
+        "required": "true",
+        "description": "Name of the workflow variable containing the user prompt (without # symbols, e.g., 'userprompt', 'question', 'request')"
+      },
+      {
+        "name": "additionalContext",
+        "label": "Additional Context Variables",
+        "type": "textarea",
+        "description": "Comma-separated list of additional workflow variables to include (e.g., 'customerName,orderAmount,productType')"
+      },
+      {
+        "name": "customPromptTemplate",
+        "label": "Custom Prompt Template",
+        "type": "textarea",
+        "description": "Custom template for the AI prompt. Use #{variable.name} to reference workflow variables. If empty, will use the userPromptVariable directly."
+      }
+    ]
+  },
+  {
+    "title": "API Configuration",
+    "properties": [
+      {
+        "name": "apiKey",
+        "label": "Gemini API Key",
+        "type": "password",
+        "required": "true",
+        "description": "Your Google Gemini API key"
+      },
+      {
+        "name": "model",
+        "label": "AI Model",
+        "type": "selectbox",
+        "value": "gemini-1.5-flash",
+        "options": [
+          {"value": "gemini-1.5-flash", "label": "Gemini 1.5 Flash (Fast)"},
+          {"value": "gemini-1.5-pro", "label": "Gemini 1.5 Pro (Advanced)"},
+          {"value": "gemini-2.0-flash", "label": "Gemini 2.0 Flash (Latest)"},
+          {"value": "gemini-2.0-pro", "label": "Gemini 2.0 Pro (Latest Advanced)"}
+        ]
+      },
+      {
+        "name": "systemInstruction",
+        "label": "System Instruction",
+        "type": "textarea",
+        "value": "You are a helpful and concise AI assistant.",
+        "description": "Instructions that guide the AI's behavior and expertise domain"
+      },
+      {
+        "name": "outputVariable",
+        "label": "Output Variable Name",
+        "type": "textfield",
+        "value": "aiResponse",
+        "description": "Name of workflow variable to store the AI response (e.g., 'aiResponse', 'analysis', 'recommendation')"
+      }
+    ]
+  }
+]

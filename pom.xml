@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mycompany.plugin</groupId>
+    <artifactId>gemini-ai-process-tool</artifactId>
+    <version>1.0.0</version>
+    <packaging>bundle</packaging>
+
+    <name>Gemini AI Process Tool Plugin</name>
+    <description>Process tool to integrate Google Gemini AI</description>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- Correct Joget Dependencies (matching what we installed) -->
+        <dependency>
+            <groupId>org.joget</groupId>
+            <artifactId>wflow-core</artifactId>
+            <version>8.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.joget</groupId>
+            <artifactId>wflow-plugin-base</artifactId>
+            <version>8.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.joget</groupId>
+            <artifactId>wflow-wfengine</artifactId>
+            <version>8.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.joget</groupId>
+            <artifactId>wflow-commons</artifactId>
+            <version>8.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- OSGi Framework -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JSON Processing -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20230227</version>
+        </dependency>
+
+        <!-- Spring Framework (usually provided by Joget) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.3.21</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>5.3.21</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+
+            <!-- Felix Bundle Plugin for OSGi -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>5.1.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>com.mycompany.plugin.Activator</Bundle-Activator>
+                        <Bundle-Name>Gemini AI Process Tool Plugin</Bundle-Name>
+                        <Bundle-SymbolicName>gemini-ai-process-tool</Bundle-SymbolicName>
+                        <Bundle-Version>1.0.0</Bundle-Version>
+                        <Bundle-Description>Process tool to integrate Google Gemini AI</Bundle-Description>
+                        <Import-Package>
+                            org.osgi.framework,
+                            org.joget.plugin.base,
+                            org.joget.workflow.model,
+                            org.joget.workflow.util,
+                            org.joget.apps.app.service,
+                            *;resolution:=optional
+                        </Import-Package>
+                        <Export-Package>
+                            com.mycompany.plugin
+                        </Export-Package>
+                        <Embed-Dependency>
+                            json
+                        </Embed-Dependency>
+                        <Embed-Transitive>false</Embed-Transitive>
+                        <Bundle-ClassPath>
+                            .,{maven-dependencies}
+                        </Bundle-ClassPath>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+    </repositories>
+</project>
