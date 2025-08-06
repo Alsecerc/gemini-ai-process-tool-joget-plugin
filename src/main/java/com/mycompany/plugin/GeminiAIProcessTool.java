@@ -26,8 +26,6 @@ import org.joget.workflow.model.WorkflowAssignment;
 public class GeminiAIProcessTool extends DefaultApplicationPlugin {
     
     private final String ClassName = getClassName();
-    // private static final String DEBUG_MODE = loadValueFromEnvFile("DEBUG") != null ? loadValueFromEnvFile("DEBUG") : "false";
-    // private static final boolean IS_DEBUG_MODE = "true".equalsIgnoreCase(DEBUG_MODE);
     private static final boolean IS_DEBUG_MODE = true; // Set to true for debugging, false for production
     
     // Debug logging method
@@ -43,25 +41,6 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
             LogUtil.error(ClassName, e, "[DEBUG ERROR] " + message);
         }
     }
-
-    // /**
-    //  * Loads a value from a .env file based on the provided key name.
-    //  */
-    // private static String loadValueFromEnvFile(String Name) {
-    //     try {
-    //         Properties props = new Properties();
-    //         InputStream envStream = GeminiAIProcessTool.class.getClassLoader().getResourceAsStream(".env");
-    //         if (envStream != null) {
-    //             props.load(envStream);
-    //             return props.getProperty(Name);
-    //         } else {
-    //             System.err.println(".env file not found in resources");
-    //         }
-    //     } catch (IOException e) {
-    //         System.err.println("Error reading .env file: " + e.getMessage());
-    //     }
-    //     return null;
-    // }
     
     @Override
     public String getName() {
@@ -312,11 +291,7 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
             debugError("Unexpected error calling Gemini API: " + e.getMessage(), e);
             return null;
         }
-        
-        
-        // MOCK RESPONSE FOR JOGET CLOUD TESTING (NO NETWORK IO)
-        // debugLog("Using mock response - network calls disabled for cloud compatibility");
-        // return "Mock AI Response: This is a test response for prompt '" + prompt + "' using model " + model + ". Network calls are disabled for Joget Cloud compatibility.";
+              
     }
     
     /**
