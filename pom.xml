@@ -57,12 +57,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSON Processing -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20230227</version>
-        </dependency>
 
         <!-- Spring Framework (usually provided by Joget) -->
         <dependency>
@@ -90,6 +84,9 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
+                    <!-- <executable>C:\Program Files\Java\jdk1.8.0_202\bin\javac</executable>
+                    <fork>true</fork> -->
+                    <compilerVersion>1.8</compilerVersion>
                 </configuration>
             </plugin>
 
@@ -103,27 +100,37 @@
                     <instructions>
                         <Bundle-Activator>com.mycompany.plugin.Activator</Bundle-Activator>
                         <Bundle-Name>Gemini AI Process Tool Plugin</Bundle-Name>
-                        <Bundle-SymbolicName>gemini-ai-process-tool</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>com.mycompany.plugin.gemini-ai-process-tool</Bundle-SymbolicName>
                         <Bundle-Version>1.0.0</Bundle-Version>
                         <Bundle-Description>Process tool to integrate Google Gemini AI</Bundle-Description>
+                        <Bundle-License>MIT</Bundle-License>
                         <Import-Package>
                             org.osgi.framework,
                             org.joget.plugin.base,
                             org.joget.workflow.model,
                             org.joget.workflow.util,
                             org.joget.apps.app.service,
-                            *;resolution:=optional
+                            org.joget.commons.util,
+                            org.springframework.context;resolution:=optional,
+                            org.springframework.beans;resolution:=optional,
+                            org.springframework.beans.factory;resolution:=optional,
+                            org.springframework.aop;resolution:=optional,
+                            org.springframework.aop.framework;resolution:=optional,
+                            org.springframework.cglib.core;resolution:=optional,
+                            org.springframework.cglib.proxy;resolution:=optional,
+                            net.sf.cglib.core;resolution:=optional,
+                            net.sf.cglib.proxy;resolution:=optional,
+                            java.lang.reflect,
+                            java.io,
+                            java.net,
+                            java.util,
+                            javax.servlet;resolution:=optional,
+                            javax.servlet.http;resolution:=optional
                         </Import-Package>
                         <Export-Package>
                             com.mycompany.plugin
                         </Export-Package>
-                        <Embed-Dependency>
-                            json
-                        </Embed-Dependency>
                         <Embed-Transitive>false</Embed-Transitive>
-                        <Bundle-ClassPath>
-                            .,{maven-dependencies}
-                        </Bundle-ClassPath>
                     </instructions>
                 </configuration>
             </plugin>

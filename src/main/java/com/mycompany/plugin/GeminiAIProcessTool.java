@@ -2,7 +2,6 @@ package com.mycompany.plugin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -10,15 +9,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Properties;
 
 import org.joget.apps.app.service.AppUtil;
 import org.joget.commons.util.LogUtil;
 import org.joget.plugin.base.DefaultApplicationPlugin;
 import org.joget.workflow.model.WorkflowAssignment;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Simple Gemini AI Process Tool Plugin
@@ -31,8 +26,9 @@ import org.json.JSONObject;
 public class GeminiAIProcessTool extends DefaultApplicationPlugin {
     
     private final String ClassName = getClassName();
-    private static final String DEBUG_MODE = loadValueFromEnvFile("DEBUG") != null ? loadValueFromEnvFile("DEBUG") : "false";
-    private static final boolean IS_DEBUG_MODE = "true".equalsIgnoreCase(DEBUG_MODE);
+    // private static final String DEBUG_MODE = loadValueFromEnvFile("DEBUG") != null ? loadValueFromEnvFile("DEBUG") : "false";
+    // private static final boolean IS_DEBUG_MODE = "true".equalsIgnoreCase(DEBUG_MODE);
+    private static final boolean IS_DEBUG_MODE = true; // Set to true for debugging, false for production
     
     // Debug logging method
     private void debugLog(String message) {
@@ -48,24 +44,24 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
         }
     }
 
-    /**
-     * Loads a value from a .env file based on the provided key name.
-     */
-    private static String loadValueFromEnvFile(String Name) {
-        try {
-            Properties props = new Properties();
-            InputStream envStream = GeminiAIProcessTool.class.getClassLoader().getResourceAsStream(".env");
-            if (envStream != null) {
-                props.load(envStream);
-                return props.getProperty(Name);
-            } else {
-                System.err.println(".env file not found in resources");
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading .env file: " + e.getMessage());
-        }
-        return null;
-    }
+    // /**
+    //  * Loads a value from a .env file based on the provided key name.
+    //  */
+    // private static String loadValueFromEnvFile(String Name) {
+    //     try {
+    //         Properties props = new Properties();
+    //         InputStream envStream = GeminiAIProcessTool.class.getClassLoader().getResourceAsStream(".env");
+    //         if (envStream != null) {
+    //             props.load(envStream);
+    //             return props.getProperty(Name);
+    //         } else {
+    //             System.err.println(".env file not found in resources");
+    //         }
+    //     } catch (IOException e) {
+    //         System.err.println("Error reading .env file: " + e.getMessage());
+    //     }
+    //     return null;
+    // }
     
     @Override
     public String getName() {
@@ -243,29 +239,19 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
             String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
             debugLog("API URL constructed");
             
-            // Create request payload
-            JSONObject requestBody = new JSONObject();
-            JSONArray contents = new JSONArray();
-            JSONObject content = new JSONObject();
-            JSONArray parts = new JSONArray();
-            JSONObject part = new JSONObject();
-            
-            part.put("text", prompt);
-            parts.put(part);
-            content.put("parts", parts);
-            contents.put(content);
-            requestBody.put("contents", contents);
-            
+            // Create request payload using string building
+            String requestBody = "{"
+                + "\"contents\":[{"
+                + "\"parts\":[{\"text\":\"" + escapeJson(prompt) + "\"}]"
+                + "}]";
+                
             // Add system instruction if provided
             if (systemInstruction != null && !systemInstruction.trim().isEmpty()) {
-                JSONObject systemInstructionObj = new JSONObject();
-                JSONArray systemParts = new JSONArray();
-                JSONObject systemPart = new JSONObject();
-                systemPart.put("text", systemInstruction);
-                systemParts.put(systemPart);
-                systemInstructionObj.put("parts", systemParts);
-                requestBody.put("systemInstruction", systemInstructionObj);
+                requestBody += ",\"systemInstruction\":{"
+                    + "\"parts\":[{\"text\":\"" + escapeJson(systemInstruction) + "\"}]"
+                    + "}";
             }
+            requestBody += "}";
             
             debugLog("Request payload prepared");
             
@@ -280,7 +266,7 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
             
             // Send request
             try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = requestBody.toString().getBytes("utf-8");
+                byte[] input = requestBody.getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
             
@@ -301,39 +287,21 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
             
             if (responseCode == 200) {
                 debugLog("Successful API response received");
-                // Parse response
-                JSONObject responseJson = new JSONObject(response.toString());
-                if (responseJson.has("candidates")) {
-                    JSONArray candidates = responseJson.getJSONArray("candidates");
-                    if (candidates.length() > 0) {
-                        JSONObject candidate = candidates.getJSONObject(0);
-                        if (candidate.has("content")) {
-                            JSONObject responseContent = candidate.getJSONObject("content");
-                            if (responseContent.has("parts")) {
-                                JSONArray responseParts = responseContent.getJSONArray("parts");
-                                if (responseParts.length() > 0) {
-                                    JSONObject responsePart = responseParts.getJSONObject(0);
-                                    if (responsePart.has("text")) {
-                                        String aiResponse = responsePart.getString("text");
-                                        debugLog("AI Response received successfully");
-                                        return aiResponse;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                // Parse response using simple string parsing
+                String responseStr = response.toString();
+                String aiResponse = extractTextFromGeminiResponse(responseStr);
+                if (aiResponse != null) {
+                    debugLog("AI Response received successfully");
+                    return aiResponse;
+                } else {
+                    debugError("ERROR: Could not extract text from Gemini API response", null);
+                    return null;
                 }
-                
-                debugError("ERROR: Unexpected response format from Gemini API", null);
-                return null;
             } else {
                 debugError("API call failed with HTTP " + responseCode + ": " + response.toString(), null);
                 return null;
             }
             
-        } catch (JSONException e) {
-            debugError("JSON parsing error: " + e.getMessage(), e);
-            return null;
         } catch (IOException e) {
             debugError("Network error calling Gemini API: " + e.getMessage(), e);
             return null;
@@ -344,6 +312,11 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
             debugError("Unexpected error calling Gemini API: " + e.getMessage(), e);
             return null;
         }
+        
+        
+        // MOCK RESPONSE FOR JOGET CLOUD TESTING (NO NETWORK IO)
+        // debugLog("Using mock response - network calls disabled for cloud compatibility");
+        // return "Mock AI Response: This is a test response for prompt '" + prompt + "' using model " + model + ". Network calls are disabled for Joget Cloud compatibility.";
     }
     
     /**
@@ -449,6 +422,75 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
         } catch (Exception e) {
             debugError("Error processing hash variables in: " + input, e);
             return input; // Return original string if processing fails
+        }
+    }
+    
+    /**
+     * Helper method to escape JSON strings
+     */
+    private String escapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
+    }
+    
+    /**
+     * Helper method to unescape JSON strings
+     */
+    private String unescapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\\\"", "\"")
+                  .replace("\\\\", "\\")
+                  .replace("\\n", "\n")
+                  .replace("\\r", "\r")
+                  .replace("\\t", "\t");
+    }
+    
+    /**
+     * Extract text from Gemini API response using simple string parsing
+     */
+    private String extractTextFromGeminiResponse(String responseStr) {
+        try {
+            // Look for the pattern: "text":"actual_content"
+            String textPattern = "\"text\":\"";
+            int textStart = responseStr.indexOf(textPattern);
+            if (textStart == -1) {
+                debugLog("Could not find 'text' field in response");
+                return null;
+            }
+            
+            textStart += textPattern.length();
+            
+            // Find the end of the text content, accounting for escaped quotes
+            int textEnd = textStart;
+            boolean escaped = false;
+            
+            while (textEnd < responseStr.length()) {
+                char c = responseStr.charAt(textEnd);
+                if (escaped) {
+                    escaped = false;
+                } else if (c == '\\') {
+                    escaped = true;
+                } else if (c == '"') {
+                    break;
+                }
+                textEnd++;
+            }
+            
+            if (textEnd >= responseStr.length()) {
+                debugLog("Could not find end of text content");
+                return null;
+            }
+            
+            String extractedText = responseStr.substring(textStart, textEnd);
+            return unescapeJson(extractedText);
+            
+        } catch (Exception e) {
+            debugError("Error extracting text from Gemini response", e);
+            return null;
         }
     }
     

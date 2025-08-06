@@ -1,5 +1,7 @@
 @echo off
-echo Building plugin...
+echo Building plugin with Java 8...
+@REM set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_202
+@REM set PATH=%JAVA_HOME%\bin;%PATH%
 call mvn clean package
 
 if not exist "target\gemini-ai-process-tool-1.0.0.jar" (

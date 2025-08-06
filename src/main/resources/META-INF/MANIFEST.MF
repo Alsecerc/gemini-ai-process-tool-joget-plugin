@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Gemini AI Process Tool
+Bundle-SymbolicName: com.mycompany.plugin.GeminiAIProcessTool
+Bundle-Version: 1.0.0
+Bundle-Activator: com.mycompany.plugin.Activator
+Bundle-Vendor: My Company
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.joget.apps.app.service,
+ org.joget.commons.util,
+ org.joget.plugin.base,
+ org.joget.workflow.model,
+ org.json,
+ org.osgi.framework,
+ javax.net.ssl,
+ java.net.http
+Export-Package: com.mycompany.plugin
+Bundle-ClassPath: .
