@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1754488792716
-Build-Jdk-Spec: 1.8
+Bnd-LastModified: 1754493179269
+Build-Jdk-Spec: 21
 Bundle-Activator: com.mycompany.plugin.Activator
 Bundle-Description: Process tool to integrate Google Gemini AI
 Bundle-License: MIT

@@ -266,8 +266,10 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
             
             if (responseCode == 200) {
                 debugLog("Successful API response received");
-                // Parse response using simple string parsing
                 String responseStr = response.toString();
+                debugLog("Full API Response: " + responseStr); // Add this to see actual response
+                
+                // Parse response using simple string parsing
                 String aiResponse = extractTextFromGeminiResponse(responseStr);
                 if (aiResponse != null) {
                     debugLog("AI Response received successfully");
@@ -429,18 +431,51 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
      */
     private String extractTextFromGeminiResponse(String responseStr) {
         try {
-            // Look for the pattern: "text":"actual_content"
-            String textPattern = "\"text\":\"";
-            int textStart = responseStr.indexOf(textPattern);
-            if (textStart == -1) {
-                debugLog("Could not find 'text' field in response");
+            debugLog("Attempting to extract text from response");
+            
+            // The actual Gemini response structure is:
+            // {"candidates": [{"content": {"parts": [{"text": "response text"}]}}]}
+            
+            // Look for the candidates array first
+            String candidatesPattern = "\"candidates\"";
+            int candidatesStart = responseStr.indexOf(candidatesPattern);
+            if (candidatesStart == -1) {
+                debugLog("No 'candidates' array found in response");
                 return null;
             }
             
-            textStart += textPattern.length();
+            // Look for the first "text" field after candidates
+            String textPattern = "\"text\"";
+            int textFieldStart = responseStr.indexOf(textPattern, candidatesStart);
+            if (textFieldStart == -1) {
+                debugLog("No 'text' field found in candidates");
+                return null;
+            }
             
-            // Find the end of the text content, accounting for escaped quotes
-            int textEnd = textStart;
+            // Find the colon and opening quote after "text"
+            int colonIndex = responseStr.indexOf(":", textFieldStart);
+            if (colonIndex == -1) {
+                debugLog("No colon found after 'text' field");
+                return null;
+            }
+            
+            // Skip whitespace and find the opening quote
+            int quoteStart = colonIndex + 1;
+            while (quoteStart < responseStr.length() && 
+                   (responseStr.charAt(quoteStart) == ' ' || responseStr.charAt(quoteStart) == '\t')) {
+                quoteStart++;
+            }
+            
+            if (quoteStart >= responseStr.length() || responseStr.charAt(quoteStart) != '"') {
+                debugLog("No opening quote found for text value");
+                return null;
+            }
+            
+            // Move past the opening quote
+            quoteStart++;
+            
+            // Find the closing quote, accounting for escaped quotes
+            int textEnd = quoteStart;
             boolean escaped = false;
             
             while (textEnd < responseStr.length()) {
@@ -450,19 +485,29 @@ public class GeminiAIProcessTool extends DefaultApplicationPlugin {
                 } else if (c == '\\') {
                     escaped = true;
                 } else if (c == '"') {
-                    break;
+                    break; // Found the closing quote
                 }
                 textEnd++;
             }
             
             if (textEnd >= responseStr.length()) {
-                debugLog("Could not find end of text content");
+                debugLog("No closing quote found for text value");
                 return null;
             }
             
-            String extractedText = responseStr.substring(textStart, textEnd);
-            return unescapeJson(extractedText);
+            // Extract and unescape the text
+            String extractedText = responseStr.substring(quoteStart, textEnd);
+            String unescapedText = unescapeJson(extractedText);
             
+            debugLog("Successfully extracted text from Gemini response");
+            debugLog("Extracted text preview: " + unescapedText.substring(0, Math.min(50, unescapedText.length())) + 
+                    (unescapedText.length() > 50 ? "..." : ""));
+            
+            return unescapedText;
+            
+        } catch (StringIndexOutOfBoundsException e) {
+            debugError("String index error while parsing response", e);
+            return null;
         } catch (Exception e) {
             debugError("Error extracting text from Gemini response", e);
             return null;
